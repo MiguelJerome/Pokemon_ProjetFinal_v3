@@ -1,0 +1,1 @@
+CREATE INDEX idx_Pokemon_Nom_Pokemon ON Pokemon(Nom_Pokemon);
