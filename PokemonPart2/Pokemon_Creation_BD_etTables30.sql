@@ -71,22 +71,23 @@ BEGIN
 
         EXEC sp_executesql @sql;
 
-        IF OBJECT_ID(@PokedexTableName, 'U') IS NULL
+        IF OBJECT_ID(@PokemonPokedexTableName, 'U') IS NULL
         BEGIN
-            SET @PokedexTableSQL = '
-            CREATE TABLE ' + @PokedexTableName + ' (
-            id_pokedex INT IDENTITY(1,1) PRIMARY KEY,
-            ' + QUOTENAME(@Nom_du_jeu) + ' NVARCHAR(255) NOT NULL,
-            ' + QUOTENAME(@Pokemon_number) + ' INT NOT NULL,
-            CONSTRAINT UC_Pokedex UNIQUE (id_pokedex),
-            CONSTRAINT UC_Pokemon_number UNIQUE (' + QUOTENAME(@Pokemon_number) + '),
-            CONSTRAINT FK_' + QUOTENAME(@Nom_du_jeu) + '_' + QUOTENAME(@Pokemon_number) + ' FOREIGN KEY (' + QUOTENAME(@Pokemon_number) + ') REFERENCES Pokemon(National_Dex_No)
+            SET @PokemonPokedexTableSQL = '
+            CREATE TABLE '+@PokemonPokedexTableName+' (
+                id INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
+                ' + QUOTENAME(@Pokemon_number) + ' INT NOT NULL,
+                ' + QUOTENAME(@id_pokedex) + ' INT NOT NULL,
+                CONSTRAINT UC_Pokemon_Pokedex UNIQUE (' + QUOTENAME(@Pokemon_number) + ', ' + QUOTENAME(@id_pokedex) + '),
+                FOREIGN KEY(' + QUOTENAME(@Pokemon_number) + ') REFERENCES ' + QUOTENAME(@PokemonTableName) + '(' + QUOTENAME('Pokemon_number') + '),
+                FOREIGN KEY(' + QUOTENAME(@id_pokedex) + ') REFERENCES ' + @PokedexTableName + '(' + QUOTENAME('id_pokedex') + ')
             );';
-            SET @PokedexTableSQL = N'USE ' + QUOTENAME(@DatabaseName) + N'; ' + @PokedexTableSQL;
-            EXEC sp_executesql @PokedexTableSQL;
+            SET @PokemonPokedexTableSQL = N'USE ' + QUOTENAME(@DatabaseName) + N'; ' + @PokemonPokedexTableSQL;
+            EXEC sp_executesql @PokemonPokedexTableSQL;
         END
 
-            IF OBJECT_ID(@ChampionsTableName, 'U') IS NULL
+
+        IF OBJECT_ID(@ChampionsTableName, 'U') IS NULL
         BEGIN
             SET @ChampionsTableSQL = '
             CREATE TABLE ' + @ChampionsTableName + ' (
@@ -155,6 +156,19 @@ BEGIN
         SET @PokemonTableSQL = N'USE ' + QUOTENAME(@DatabaseName) + N'; ' + @PokemonTableSQL;
         EXEC sp_executesql @PokemonTableSQL;
     END
+
+    IF OBJECT_ID('Pokemon_Pokedex', 'U') IS NULL
+BEGIN
+    -- create 'Pokemon_Pokedex' table
+END
+ELSE
+BEGIN
+    ALTER TABLE Pokemon_Pokedex
+    DROP CONSTRAINT FK__Pokemon_P__Pokem__3D5E1FD2;
+    
+    ALTER TABLE Pokemon_Pokedex
+    ADD CONSTRAINT FK_Pokemon_Pokedex_Pokemon FOREIGN KEY(Pokemon_number) REFERENCES Pokemon(Pokemon_number);
+END
 
     IF OBJECT_ID(@DresseurTableName, 'U') IS NULL
     BEGIN
