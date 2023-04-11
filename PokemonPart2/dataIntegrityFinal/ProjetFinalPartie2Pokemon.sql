@@ -89,97 +89,97 @@ BEGIN
         END
 
         IF OBJECT_ID(@ChampionsTableName, 'U') IS NULL
-        BEGIN
-            SET @ChampionsTableSQL = '
-            CREATE TABLE ' + QUOTENAME(@ChampionsTableName) + ' (
-                id_champion INT IDENTITY(1,1) PRIMARY KEY,
-                ' + QUOTENAME(@Nom) + ' NVARCHAR(50) NOT NULL,
-                ' + QUOTENAME(@Team_type) + ' NVARCHAR(50) NOT NULL,
-                ' + QUOTENAME(@id_pokedex) + ' INT NOT NULL,
-                ' + QUOTENAME(@Nom_region) + ' NVARCHAR(50) NOT NULL,
-                CONSTRAINT UC_Champions UNIQUE (id_champion),
-                CONSTRAINT FK_Champions_id_pokedex FOREIGN KEY (id_pokedex) REFERENCES ' + QUOTENAME(@PokedexTableName) + ' (id_pokedex)
-            );';
-            SET @ChampionsTableSQL = N'USE ' + QUOTENAME(@DatabaseName) + N'; ' + @ChampionsTableSQL;
-            EXEC sp_executesql @ChampionsTableSQL;
-        END
-
+            BEGIN
+                SET @ChampionsTableSQL = '
+                CREATE TABLE ' + QUOTENAME(@ChampionsTableName) + ' (
+                    id_champion INT IDENTITY(1,1) PRIMARY KEY,
+                    ' + QUOTENAME(@Nom) + ' NVARCHAR(50) NOT NULL,
+                    ' + QUOTENAME(@Team_type) + ' NVARCHAR(50) NOT NULL,
+                    ' + QUOTENAME(@id_pokedex) + ' INT NOT NULL,
+                    ' + QUOTENAME(@Nom_region) + ' NVARCHAR(50) NOT NULL,
+                    CONSTRAINT UC_Champions_Nom UNIQUE (' + QUOTENAME(@Nom) + '),
+                    CONSTRAINT UC_Champions UNIQUE (id_champion),
+                    CONSTRAINT FK_Champions_id_pokedex FOREIGN KEY (id_pokedex) REFERENCES ' + QUOTENAME(@PokedexTableName) + ' (id_pokedex)
+                );';
+                SET @ChampionsTableSQL = N'USE ' + QUOTENAME(@DatabaseName) + N'; ' + @ChampionsTableSQL;
+                EXEC sp_executesql @ChampionsTableSQL;
+            END
 
     IF OBJECT_ID(@CapaciteTableName, 'U') IS NULL
-    BEGIN
-        SET @CapaciteTableSQL = '
-        CREATE TABLE ' + QUOTENAME(@CapaciteTableName) + ' (
-            id_capacite INT IDENTITY(1,1) PRIMARY KEY,
-            ' + QUOTENAME(@Nom) + ' NVARCHAR(50) NOT NULL,
-            ' + QUOTENAME(@Lev_unlock) + ' INT NOT NULL CHECK (' + QUOTENAME(@Lev_unlock) + ' >= 0),
-            ' + QUOTENAME(@Power_cap) + ' INT CHECK (' + QUOTENAME(@Power_cap) + ' >= 0),
-            ' + QUOTENAME(@Accuracy) + ' INT CHECK (' + QUOTENAME(@Accuracy) + ' >= 0 AND ' + QUOTENAME(@Accuracy) + ' <= 100),
-            ' + QUOTENAME(@PP) + ' INT NOT NULL CHECK (' + QUOTENAME(@PP) + ' >= 0),
-            ' + QUOTENAME(@Category) + ' NVARCHAR(20) NOT NULL,
-            ' + QUOTENAME(@Type_cap) + ' NVARCHAR(20) NOT NULL,
-            CONSTRAINT UC_Capacite UNIQUE (id_capacite),
-            CONSTRAINT UC_Nom UNIQUE (' + QUOTENAME(@Nom) + ')
-        );';
-        SET @CapaciteTableSQL = N'USE ' + QUOTENAME(@DatabaseName) + N'; ' + @CapaciteTableSQL;
-        EXEC sp_executesql @CapaciteTableSQL;
-    END
-
+        BEGIN
+            SET @CapaciteTableSQL = '
+            CREATE TABLE ' + QUOTENAME(@CapaciteTableName) + ' (
+                id_capacite INT IDENTITY(1,1) PRIMARY KEY,
+                ' + QUOTENAME(@Nom) + ' NVARCHAR(50) NOT NULL,
+                ' + QUOTENAME(@Lev_unlock) + ' INT NOT NULL CHECK (' + QUOTENAME(@Lev_unlock) + ' >= 0),
+                ' + QUOTENAME(@Power_cap) + ' INT CHECK (' + QUOTENAME(@Power_cap) + ' >= 0),
+                ' + QUOTENAME(@Accuracy) + ' INT CHECK (' + QUOTENAME(@Accuracy) + ' >= 0 AND ' + QUOTENAME(@Accuracy) + ' <= 100),
+                ' + QUOTENAME(@PP) + ' INT NOT NULL CHECK (' + QUOTENAME(@PP) + ' >= 0),
+                ' + QUOTENAME(@Category) + ' NVARCHAR(20) NOT NULL,
+                ' + QUOTENAME(@Type_cap) + ' NVARCHAR(20) NOT NULL,
+                CONSTRAINT UC_Capacite UNIQUE (id_capacite),
+                CONSTRAINT UC_Capacite_Nom UNIQUE (' + QUOTENAME(@Nom) + ')
+            );';
+            SET @CapaciteTableSQL = N'USE ' + QUOTENAME(@DatabaseName) + N'; ' + @CapaciteTableSQL;
+            EXEC sp_executesql @CapaciteTableSQL;
+        END
 
     IF OBJECT_ID(@GenerationsTableName, 'U') IS NULL
-    BEGIN
-        SET @GenerationsTableSQL = '
-        CREATE TABLE ' + QUOTENAME(@GenerationsTableName) + ' (
-            Gen_number INT IDENTITY(1,1) PRIMARY KEY,
-            ' + QUOTENAME(@Nom_region) + ' NVARCHAR(50) NOT NULL,
-            ' + QUOTENAME(@id_champion) + ' INT NOT NULL,
-            CONSTRAINT UC_Generations UNIQUE (Gen_number),
-            CONSTRAINT FK_Generations_id_champion FOREIGN KEY (' + QUOTENAME(@id_champion) + ') REFERENCES ' + QUOTENAME(@ChampionsTableName) + ' (' + QUOTENAME(@id_champion) + ')
-        );';
-        SET @GenerationsTableSQL = N'USE ' + QUOTENAME(@DatabaseName) + N'; ' + @GenerationsTableSQL;
-        EXEC sp_executesql @GenerationsTableSQL;
-    END
-
+        BEGIN
+            SET @GenerationsTableSQL = '
+            CREATE TABLE ' + QUOTENAME(@GenerationsTableName) + ' (
+                Gen_number INT IDENTITY(1,1) PRIMARY KEY,
+                ' + QUOTENAME(@Nom_region) + ' NVARCHAR(50) NOT NULL,
+                ' + QUOTENAME(@id_champion) + ' INT NOT NULL,
+                CONSTRAINT UC_Generations UNIQUE (Gen_number),
+                CONSTRAINT UC_Nom_region UNIQUE (' + QUOTENAME(@Nom_region) + '), -- Added unique constraint on Nom_region column
+                CONSTRAINT FK_Generations_id_champion FOREIGN KEY (' + QUOTENAME(@id_champion) + ') REFERENCES ' + QUOTENAME(@ChampionsTableName) + ' (' + QUOTENAME(@id_champion) + ')
+            );';
+            SET @GenerationsTableSQL = N'USE ' + QUOTENAME(@DatabaseName) + N'; ' + @GenerationsTableSQL;
+            EXEC sp_executesql @GenerationsTableSQL;
+        END
 
     IF OBJECT_ID(@PokemonTableName, 'U') IS NULL
-    BEGIN
-        SET @PokemonTableSQL = '
-        CREATE TABLE ' + QUOTENAME(@PokemonTableName) + ' (
-            Pokemon_number INT IDENTITY(1,1) PRIMARY KEY,
-            ' + QUOTENAME(@Nom_Pokemon) + ' NVARCHAR(255) NOT NULL,
-            ' + QUOTENAME(@Type_1) + ' NVARCHAR(20) NOT NULL,
-            ' + QUOTENAME(@Type_2) + ' NVARCHAR(20),
-            ' + QUOTENAME(@Gen_number) + ' INT NOT NULL,
-            ' + QUOTENAME(@HP) + ' INT NOT NULL CHECK (' + QUOTENAME(@HP) + ' > 0),
-            ' + QUOTENAME(@Attack) + ' INT NOT NULL CHECK (' + QUOTENAME(@Attack) + ' > 0),
-            ' + QUOTENAME(@Defense) + ' INT NOT NULL CHECK (' + QUOTENAME(@Defense) + ' > 0),
-            ' + QUOTENAME(@Sp_Attack) + ' INT NOT NULL CHECK (' + QUOTENAME(@Sp_Attack) + ' > 0),
-            ' + QUOTENAME(@Sp_Defense) + ' INT NOT NULL CHECK (' + QUOTENAME(@Sp_Defense) + ' > 0),
-            ' + QUOTENAME(@Speed) + ' INT NOT NULL CHECK (' + QUOTENAME(@Speed) + ' > 0),
-            CONSTRAINT UC_Pokemon UNIQUE (Pokemon_number),
-            CONSTRAINT FK_Pokemon_Gen_number FOREIGN KEY (' + QUOTENAME(@Gen_number) + ') REFERENCES ' + QUOTENAME(@GenerationsTableName) + ' (' + QUOTENAME(@Gen_number) + ')
-        );';
-        SET @PokemonTableSQL = N'USE ' + QUOTENAME(@DatabaseName) + N'; ' + @PokemonTableSQL;
-        EXEC sp_executesql @PokemonTableSQL;
-    END
-
+        BEGIN
+            SET @PokemonTableSQL = '
+            CREATE TABLE ' + QUOTENAME(@PokemonTableName) + ' (
+                Pokemon_number INT IDENTITY(1,1) PRIMARY KEY,
+                ' + QUOTENAME(@Nom_Pokemon) + ' NVARCHAR(255) NOT NULL,
+                ' + QUOTENAME(@Type_1) + ' NVARCHAR(20) NOT NULL,
+                ' + QUOTENAME(@Type_2) + ' NVARCHAR(20),
+                ' + QUOTENAME(@Gen_number) + ' INT NOT NULL,
+                ' + QUOTENAME(@HP) + ' INT NOT NULL CHECK (' + QUOTENAME(@HP) + ' > 0),
+                ' + QUOTENAME(@Attack) + ' INT NOT NULL CHECK (' + QUOTENAME(@Attack) + ' > 0),
+                ' + QUOTENAME(@Defense) + ' INT NOT NULL CHECK (' + QUOTENAME(@Defense) + ' > 0),
+                ' + QUOTENAME(@Sp_Attack) + ' INT NOT NULL CHECK (' + QUOTENAME(@Sp_Attack) + ' > 0),
+                ' + QUOTENAME(@Sp_Defense) + ' INT NOT NULL CHECK (' + QUOTENAME(@Sp_Defense) + ' > 0),
+                ' + QUOTENAME(@Speed) + ' INT NOT NULL CHECK (' + QUOTENAME(@Speed) + ' > 0),
+                CONSTRAINT UC_Pokemon UNIQUE (Pokemon_number),
+                CONSTRAINT UC_Nom_Pokemon UNIQUE (' + QUOTENAME(@Nom_Pokemon) + '),
+                CONSTRAINT UC_Type_1_Type_2 UNIQUE (' + QUOTENAME(@Type_1) + ', ' + QUOTENAME(@Type_2) + '), -- Added composite unique constraint on Type_1 and Type_2
+                CONSTRAINT FK_Pokemon_Gen_number FOREIGN KEY (' + QUOTENAME(@Gen_number) + ') REFERENCES ' + QUOTENAME(@GenerationsTableName) + ' (' + QUOTENAME(@Gen_number) + ')
+            );';
+            SET @PokemonTableSQL = N'USE ' + QUOTENAME(@DatabaseName) + N'; ' + @PokemonTableSQL;
+            EXEC sp_executesql @PokemonTableSQL;
+        END
 
     IF OBJECT_ID(@DresseurTableName, 'U') IS NULL
-    BEGIN
-        SET @DresseurTableSQL = '
-        CREATE TABLE ' + QUOTENAME(@DresseurTableName) + ' (
-            id_dresseur INT IDENTITY(1,1) PRIMARY KEY,
-            ' + QUOTENAME(@Nom) + ' NVARCHAR(50) NOT NULL,
-            ' + QUOTENAME(@Gen_number) + ' INT NOT NULL,
-            ' + QUOTENAME(@Gender) + ' NVARCHAR(10) NOT NULL,
-            ' + QUOTENAME(@Team_size) + ' TINYINT NOT NULL CHECK (' + QUOTENAME(@Team_size) + ' BETWEEN 1 AND 6), /*Max 6*/
-            CONSTRAINT UC_Dresseur UNIQUE (id_dresseur),
-            CONSTRAINT FK_Dresseur_id_champion FOREIGN KEY (id_dresseur) REFERENCES ' + QUOTENAME(@ChampionsTableName) + ' (id_champion),
-            CONSTRAINT FK_Dresseur_Gen_number FOREIGN KEY (' + QUOTENAME(@Gen_number) + ') REFERENCES ' + QUOTENAME(@GenerationsTableName) + ' (Gen_number)
-        );';
-        SET @DresseurTableSQL = N'USE ' + QUOTENAME(@DatabaseName) + N'; ' + @DresseurTableSQL;
-        EXEC sp_executesql @DresseurTableSQL;
-    END
-
+        BEGIN
+            SET @DresseurTableSQL = '
+            CREATE TABLE ' + QUOTENAME(@DresseurTableName) + ' (
+                id_dresseur INT IDENTITY(1,1) PRIMARY KEY,
+                ' + QUOTENAME(@Nom) + ' NVARCHAR(50) NOT NULL,
+                ' + QUOTENAME(@Gen_number) + ' INT NOT NULL,
+                ' + QUOTENAME(@Gender) + ' NVARCHAR(10) NOT NULL,
+                ' + QUOTENAME(@Team_size) + ' TINYINT NOT NULL CHECK (' + QUOTENAME(@Team_size) + ' BETWEEN 1 AND 6), /*Max 6*/
+                CONSTRAINT UC_Dresseur UNIQUE (id_dresseur),
+                CONSTRAINT UC_Dresseur_Nom UNIQUE (' + QUOTENAME(@Nom) + '),  
+                CONSTRAINT FK_Dresseur_id_champion FOREIGN KEY (id_dresseur) REFERENCES ' + QUOTENAME(@ChampionsTableName) + ' (id_champion),
+                CONSTRAINT FK_Dresseur_Gen_number FOREIGN KEY (' + QUOTENAME(@Gen_number) + ') REFERENCES ' + QUOTENAME(@GenerationsTableName) + ' (Gen_number)
+            );';
+            SET @DresseurTableSQL = N'USE ' + QUOTENAME(@DatabaseName) + N'; ' + @DresseurTableSQL;
+            EXEC sp_executesql @DresseurTableSQL;
+        END
 
         IF OBJECT_ID(@PokemonDresseurTableName, 'U') IS NULL
     BEGIN
@@ -197,24 +197,23 @@ BEGIN
         EXEC sp_executesql @PokemonDresseurTableSQL;
     END
 
-
     IF OBJECT_ID(@PokemonCapaciteTableName, 'U') IS NULL
-    BEGIN
-        SET @PokemonCapaciteTableSQL = '
-        CREATE TABLE ' + QUOTENAME(@PokemonCapaciteTableName) + ' (
-            id INT IDENTITY(1,1) PRIMARY KEY,
-            ' + QUOTENAME(@Pokemon_number) + ' INT NOT NULL,
-            ' + QUOTENAME(@Nom) + ' NVARCHAR(50) NOT NULL,
-            ' + QUOTENAME(@Level) + ' INT NOT NULL CHECK (' + QUOTENAME(@Level) + ' BETWEEN 1 AND 100),
-            ' + QUOTENAME(@id_capacite) + ' INT NOT NULL,
-            CONSTRAINT UC_PokemonCapacite UNIQUE (' + QUOTENAME(@Pokemon_number) + ', ' + QUOTENAME(@id_capacite) + '),
-            CONSTRAINT FK_PokemonCapacite_Pokemon_number FOREIGN KEY (' + QUOTENAME(@Pokemon_number) + ') REFERENCES ' + QUOTENAME(@PokemonTableName) + ' (Pokemon_number),
-            CONSTRAINT FK_PokemonCapacite_id_capacite FOREIGN KEY (' + QUOTENAME(@id_capacite) + ') REFERENCES ' + QUOTENAME(@CapaciteTableName) + ' (id_capacite)
-        );';
-        SET @PokemonCapaciteTableSQL = N'USE ' + QUOTENAME(@DatabaseName) + N'; ' + @PokemonCapaciteTableSQL;
-        EXEC sp_executesql @PokemonCapaciteTableSQL;
-    END
-
+        BEGIN
+            SET @PokemonCapaciteTableSQL = '
+            CREATE TABLE ' + QUOTENAME(@PokemonCapaciteTableName) + ' (
+                id INT IDENTITY(1,1) PRIMARY KEY,
+                ' + QUOTENAME(@Pokemon_number) + ' INT NOT NULL,
+                ' + QUOTENAME(@Nom) + ' NVARCHAR(50) NOT NULL,
+                ' + QUOTENAME(@Level) + ' INT NOT NULL CHECK (' + QUOTENAME(@Level) + ' BETWEEN 1 AND 100),
+                ' + QUOTENAME(@id_capacite) + ' INT NOT NULL,
+                CONSTRAINT UC_PokemonCapacite UNIQUE (' + QUOTENAME(@Pokemon_number) + ', ' + QUOTENAME(@id_capacite) + '),
+                CONSTRAINT UC_PokemonCapacite_Nom UNIQUE (' + QUOTENAME(@Nom) + '),
+                CONSTRAINT FK_PokemonCapacite_Pokemon_number FOREIGN KEY (' + QUOTENAME(@Pokemon_number) + ') REFERENCES ' + QUOTENAME(@PokemonTableName) + ' (Pokemon_number),
+                CONSTRAINT FK_PokemonCapacite_id_capacite FOREIGN KEY (' + QUOTENAME(@id_capacite) + ') REFERENCES ' + QUOTENAME(@CapaciteTableName) + ' (id_capacite)
+            );';
+            SET @PokemonCapaciteTableSQL = N'USE ' + QUOTENAME(@DatabaseName) + N'; ' + @PokemonCapaciteTableSQL;
+            EXEC sp_executesql @PokemonCapaciteTableSQL;
+        END
 
     IF OBJECT_ID(@DresseurGenerationTableName, 'U') IS NULL
     BEGIN
@@ -230,7 +229,6 @@ BEGIN
         SET @DresseurGenerationTableSQL = N'USE ' + QUOTENAME(@DatabaseName) + N'; ' + @DresseurGenerationTableSQL;
         EXEC sp_executesql @DresseurGenerationTableSQL;
     END
-
 
     IF OBJECT_ID(@PokemonPokedexTableName, 'U') IS NULL
     BEGIN
